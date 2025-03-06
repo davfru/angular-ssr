@@ -1,5 +1,5 @@
 {
-  "name": "angular-oath-login",
+  "name": "angular-ssr",
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
@@ -7,7 +7,8 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "serve:ssr:angular-oath-login": "node dist/angular-oath-login/server/server.mjs"
+    "preserve:ssr:angular-ssr": "ng build",
+    "serve:ssr:angular-ssr": "node dist/angular-ssr/server/server.mjs"
   },
   "private": true,
   "dependencies": {
@@ -20,8 +21,11 @@
     "@angular/platform-server": "^19.2.0",
     "@angular/router": "^19.2.0",
     "@angular/ssr": "^19.2.1",
+    "@tailwindcss/postcss": "^4.0.11",
     "express": "^4.18.2",
+    "postcss": "^8.5.3",
     "rxjs": "~7.8.0",
+    "tailwindcss": "^4.0.11",
     "tslib": "^2.3.0",
     "zone.js": "~0.15.0"
   },

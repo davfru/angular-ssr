@@ -1,59 +1,70 @@
-# AngularOathLogin
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.2.1.
+# Angular SSR (Server Side Rendering) with AWS Cloudfront 
 
-## Development server
+This project allows you to deploy a fully functional Angular SSR on AWS using CDK.
 
-To start a local development server, run:
+## Why Use SSR?
 
-```bash
-ng serve
+Server-Side Rendering (SSR) is beneficial for:
+
+- SEO Optimization: Search engines can crawl and index server-rendered pages more effectively.
+- Faster Initial Load Time: SSR improves perceived performance by sending pre-rendered HTML to the client.
+- Enhanced Performancez on Slow Networks: Reduces JavaScript execution time on the client side, making applications more responsive.
+
+## Requirements
+
+- VSCode with Dev Container extension
+- Docker
+- An AWS account
+
+## Part 1 - Serve static content through Cloudfront
+
+### Why Use CloudFront?
+
+AWS CloudFront is a fast, secure, and scalable Content Delivery Network (CDN) that helps improve application performance by:
+
+- Caching Static Content: Reduces latency and offloads traffic from the origin server.
+- Global Distribution: Serves content from edge locations closer to users, reducing load times.
+- Cost Efficiency: Reduces data transfer costs by leveraging caching mechanisms.
+
+### Run angular app locally 
+
+#### No SSR
+
+```sh
+cd angular
+npm i
+npm run start --configuration=development
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+#### With SSR
 
-## Code scaffolding
+First of all we need to deploy the AWS stack running from the project root: 
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
+```sh
+make deploy/dev
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+then we need to update *CDN_URL* in ```angular/src/server.ts``` with the cdn url just deployed.
 
-```bash
-ng generate --help
+Finally we can run the Angular server locally running:
+
+```sh
+cd angular
+npm i
+npm run serve:ssr:angular-ssr
 ```
 
-## Building
+##### improvements
 
-To build the project run:
+- handle env var using dotenv inside ```angular/src/server.ts```
 
-```bash
-ng build
+##### destroy aws stack
+
+```sh
+make destroy/dev
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+## Part 2 - Deploy the Angular Server on AWS 
 
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+... *upcoming*
