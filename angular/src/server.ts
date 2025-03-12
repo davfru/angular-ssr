@@ -12,9 +12,6 @@ const indexHtml = join(serverDistFolder, 'index.server.html');
 const app = express();
 const commonEngine = new CommonEngine();
 
-// TODO replace with dotenv
-const CDN_URL = "https://dd0qlxkzz9bjg.cloudfront.net";
-
 /**
  * Example Express Rest API endpoints can be defined here.
  * Uncomment and define endpoints as necessary.
@@ -30,17 +27,12 @@ const CDN_URL = "https://dd0qlxkzz9bjg.cloudfront.net";
 /**
  * Serve static files from /browser
  */
-// app.get(
-//   '**',
-//   express.static(browserDistFolder, {
-//     maxAge: '1y',
-//     index: 'index.html'
-//   }),
-// );
-
-// app.get('/assets/*', (req, res) => {
-app.get(/\/(.*\.(?:css|js|jpg|png|gif|svg|woff|woff2))$/, (req, res) =>
-  res.redirect(`${CDN_URL}${req.originalUrl}`)
+app.get(
+  '**',
+  express.static(browserDistFolder, {
+    maxAge: '1y',
+    index: 'index.html'
+  }),
 );
 
 /**
@@ -48,12 +40,6 @@ app.get(/\/(.*\.(?:css|js|jpg|png|gif|svg|woff|woff2))$/, (req, res) =>
  */
 app.get('**', (req, res, next) => {
   const { protocol, originalUrl, baseUrl, headers } = req;
-
-  // console.log("protocol: ", protocol)
-  // console.log("originalUrl: ", originalUrl)
-  // console.log("baseUrl: ", baseUrl)
-  // console.log("headers: ", headers)
-  // console.log("browserDistFolder: ", browserDistFolder)
 
   commonEngine
     .render({
