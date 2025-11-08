@@ -49,8 +49,8 @@ export class SsrStack extends Stack {
     const ssrFunction = new lambda.Function(this, "ssrHandler", {
       runtime: lambda.Runtime.NODEJS_22_X,
       code: lambda.Code.fromAsset("../angular/dist/angular-ssr"),
-      memorySize: 128,
-      timeout: Duration.seconds(5),
+      memorySize: 512, // Increased from 128MB for better SSR performance
+      timeout: Duration.seconds(10), // Increased from 5s to handle complex renders
       handler: "server/server.handler",
     });
 
@@ -66,6 +66,20 @@ export class SsrStack extends Stack {
 
     const apiDomainName = `${ssrApi.restApiId}.execute-api.${this.region}.amazonaws.com`;
 
+    // Create a custom cache policy for SSR responses
+    const ssrCachePolicy = new cloudfront.CachePolicy(this, 'SSRCachePolicy', {
+      cachePolicyName: 'SSRCachePolicy',
+      comment: 'Cache policy for SSR responses with intelligent caching',
+      defaultTtl: Duration.minutes(5),
+      maxTtl: Duration.minutes(10),
+      minTtl: Duration.seconds(0),
+      headerBehavior: cloudfront.CacheHeaderBehavior.allowList('Accept', 'Accept-Language'),
+      queryStringBehavior: cloudfront.CacheQueryStringBehavior.all(),
+      cookieBehavior: cloudfront.CacheCookieBehavior.none(),
+      enableAcceptEncodingGzip: true,
+      enableAcceptEncodingBrotli: true,
+    });
+
     const distribution = new cloudfront
       .Distribution(this, "ssr-cdn", {
         defaultBehavior: {
@@ -77,11 +91,12 @@ export class SsrStack extends Stack {
             origin: new cloudfront_origins.HttpOrigin(apiDomainName, {
               originPath: "/prod",
             }),
-            cachePolicy: cloudfront.CachePolicy.CACHING_DISABLED,
+            cachePolicy: ssrCachePolicy, // Use intelligent caching instead of disabled
             viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
             originRequestPolicy: cloudfront.OriginRequestPolicy.ALL_VIEWER_EXCEPT_HOST_HEADER,
             responseHeadersPolicy: cloudfront.ResponseHeadersPolicy.CORS_ALLOW_ALL_ORIGINS,
-            allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL
+            allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL,
+            compress: true, // Enable compression for better performance
           },
         },
         defaultRootObject: "index.csr.html"

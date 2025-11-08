@@ -27,30 +27,31 @@ const commonEngine = new CommonEngine();
 /**
  * Serve static files from /browser
  */
-app.get(
-  '**',
+app.use(
   express.static(browserDistFolder, {
     maxAge: '1y',
-    index: 'index.html'
+    index: false // Prevent serving index.html automatically, let SSR handle it
   }),
 );
 
 /**
  * Handle all other requests by rendering the Angular application.
  */
-app.get('**', (req, res, next) => {
+app.get('**', async (req, res, next) => {
   const { protocol, originalUrl, baseUrl, headers } = req;
 
-  commonEngine
-    .render({
+  try {
+    const html = await commonEngine.render({
       bootstrap,
       documentFilePath: indexHtml,
       url: `${protocol}://${headers.host}${originalUrl}`,
       publicPath: browserDistFolder,
       providers: [{ provide: APP_BASE_HREF, useValue: baseUrl }],
-    })
-    .then((html) => res.send(html))
-    .catch((err) => next(err));
+    });
+    res.send(html);
+  } catch (err) {
+    next(err);
+  }
 });
 
 /**
