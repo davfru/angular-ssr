@@ -11,6 +11,7 @@ const browserDistFolder = resolve(serverDistFolder, '../browser');
 const indexHtml = join(serverDistFolder, 'index.server.html');
 
 const app = express();
+// Reuse CommonEngine instance across Lambda invocations for better performance
 const commonEngine = new CommonEngine();
 
 // Serve static files from /browser
@@ -23,7 +24,6 @@ app.use(
 
 // Handle all other requests by rendering the Angular application
 app.get('**', async (req, res, next) => {
-
   try {
     const html = await commonEngine.render({
       bootstrap,
@@ -32,6 +32,10 @@ app.get('**', async (req, res, next) => {
       publicPath: browserDistFolder,
       providers: [{ provide: APP_BASE_HREF, useValue: req.baseUrl }],
     });
+    
+    // Set proper headers for optimal performance
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.setHeader('Cache-Control', 'public, max-age=300, s-maxage=600'); // Cache for 5 min client, 10 min CDN
     res.send(html);
   } catch (err) {
     next(err);
